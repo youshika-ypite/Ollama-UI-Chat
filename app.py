@@ -6,8 +6,6 @@ from PySide6.QtCore import QThread, Signal, Slot
 
 from ui import *
 
-from config import Config
-
 MODEL = "llama3.1"
 
 ROLE = "role"
@@ -40,8 +38,6 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
 
         self.setStyleSheet(open("style.css", "r").read())
-
-        self.config = Config()
 
         self.ollamaResponse = ""
         self.Lasttext = None
