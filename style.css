@@ -1,0 +1,23 @@
+* {
+	color: black;
+	background-color: white;
+}
+
+QLabel {
+	padding:5px;
+	margin: 5px;
+	border-style: solid;
+	border-radius: 10px;
+	border-width: 1px;
+	border-color: black;
+	qproperty-alignment: 'AlignTop | AlignLeft';
+    background-color: transparent;
+}
+QPlainTextEdit {
+	margin: 10px 0px;
+	padding: 10px;
+	border-style: solid;
+	border-width: 1px;
+	border-color: black;
+	border-radius: 5px;
+}
