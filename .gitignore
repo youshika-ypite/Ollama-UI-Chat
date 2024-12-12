@@ -1,6 +1,6 @@
-config.py
-test.ui
-temp/
-__pycache__/
-venv/
-data/
+Toggle Animation
+__pycache__
+venv
+temp
+*.txt
+data/chats.json

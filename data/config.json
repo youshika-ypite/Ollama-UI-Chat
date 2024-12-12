@@ -1,0 +1,13 @@
+{
+    "settings": {
+        "user_name": "your_name",
+        "theme": 0,
+        "ollama_model": "llama3.1"
+    },
+    "icons": [
+        "icons/dark-mess.svg",
+        "icons/dark-origm.svg",
+        "icons/light-mess.svg",
+        "icons/light-origm.svg"
+    ]
+}

@@ -1,0 +1,48 @@
+#main_widget {
+    background-color: #1C1C1C;
+}
+* {
+    background-color: transparent;
+}
+/* Message QLabel */
+#msg_tittle {
+    background-color: transparent;
+    color: whitesmoke;
+}
+#msg_content {
+    background-color: transparent;
+    color: whitesmoke;
+}
+/*Tittle frame*/
+#msg_tittle_frame {
+    background-color: transparent;
+}
+/*Content frame - User message*/
+#msg_content_frame_user {
+    background-color: #29799C;
+    border-color: #29799C;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 18px;
+}
+/*Content frame - Bot message*/
+#msg_content_frame_bot {
+    background-color: #2A3038;
+    border-color: #2A3038;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 18px;
+}
+/*Text-Input widget*/
+#text_input {
+    color: white;
+    border-color: white;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 15px;
+    padding: 5px;
+}
+/*send_button*/
+#send_btn {
+    color: white;
+}
