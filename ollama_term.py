@@ -1,10 +1,10 @@
 import ollama
 
-from config import Config
-
 from typing import AnyStr
 from typing import Mapping, Iterator
 from typing import Optional, Sequence
+
+from config import Config
 
 ROLE = "role"
 CONTENT = "content"
@@ -12,8 +12,6 @@ CONTENT = "content"
 USER = "user"
 SYSTEM = "system"
 ASSISTANT = "assistant"
-
-config = Config()
 
 OLLAMA_PARAMS = {
     "options": {
@@ -37,6 +35,8 @@ OLLAMA_PARAMS = {
         #"top_p": 0.9
     }
 }
+
+config = Config()
 
 class Ollama:
     """Create an Ollama client"""

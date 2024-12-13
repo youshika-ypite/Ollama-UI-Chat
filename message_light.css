@@ -2,6 +2,7 @@
     background-color: #FBFBFB;
 }
 * {
+    color: black;
     background-color: transparent;
 }
 /* Message QLabel */
@@ -43,6 +44,10 @@
     padding: 5px;
 }
 /*send_button and change_theme_button*/
-#send_btn, #change_btn {
+#send_btn {
     color: black;
+}
+#status_bar {
+    color: Black;
+    background-color: bisque;
 }

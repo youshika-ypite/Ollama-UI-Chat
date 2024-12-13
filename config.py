@@ -72,16 +72,16 @@ class Config:
     theme = config["settings"]["theme"] 
 
     @staticmethod
-    def get_config() -> dict:
+    def _get_config() -> dict:
         return Config.config
     
     @staticmethod
-    def get_chats() -> dict:
+    def _get_chats() -> dict:
         return Config.chats
 
     @staticmethod
     def get_settings() -> dict:
-        copyied = Config.get_config().copy()
+        copyied = Config._get_config().copy()
         return copyied["settings"]
     
     @staticmethod
@@ -97,13 +97,13 @@ class Config:
         return Config.get_settings()["ollama_model"]
     
     @staticmethod
-    def get_chats() -> list:
-        copyied = Config.get_chats().copy()
+    def get_chats() -> dict:
+        copyied = Config._get_chats().copy()
         return copyied["chats"]
     
     @staticmethod
     def get_chat_wname(name: str) -> bool|dict[str, any]:
-        copyied = Config.get_chats().copy()
+        copyied = Config._get_chats().copy()
         if name in copyied["chats"]:
             return copyied["chats"]["name"]
         else:
@@ -116,7 +116,7 @@ class Config:
     @staticmethod
     def delete_chat(name: str):
         if name in Config.chats["chats"]:
-            Config.chats["chats"].pop("name")
+            Config.chats["chats"].pop(name)
 
     @staticmethod
     def search(name: str) -> dict|None:

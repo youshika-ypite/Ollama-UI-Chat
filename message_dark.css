@@ -2,6 +2,7 @@
     background-color: #1C1C1C;
 }
 * {
+    color: white;
     background-color: transparent;
 }
 /* Message QLabel */
@@ -45,4 +46,8 @@
 /*send_button*/
 #send_btn {
     color: white;
+}
+#status_bar, #status_bar QPushButton {
+    color: white;
+    background-color: #1C1C1C;
 }

@@ -1,7 +1,7 @@
 {
     "settings": {
         "user_name": "your_name",
-        "theme": 0,
+        "theme": 1,
         "ollama_model": "llama3.1"
     },
     "icons": [

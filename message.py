@@ -7,10 +7,7 @@ from PySide6.QtWidgets import QSizePolicy
 from PySide6.QtWidgets import QWidget, QFrame, QLayout
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QSpacerItem
 
-
 from config import Config
-config = Config()
-
 
 ICON_SIZE = QSize(24, 24)
 ICON_FRAME_SIZE = QSize(48, 48)
@@ -18,11 +15,14 @@ ICON_FRAME_SIZE = QSize(48, 48)
 USER_HORIZONTAL_SPACER = QSpacerItem(40, 0, QSizePolicy.Policy.Expanding)
 BASE_HORIZONTAL_SPACER = QSpacerItem(40, 0, QSizePolicy.Policy.Preferred)
 
+config = Config()
 
 def generate_message_widget(user: bool = False) -> tuple[QWidget, QLabel]:
 
-    if user: tittle_name = config.get_user_name()
-    else: tittle_name = config.get_ollama_name()
+    if user:
+        tittle_name = config.get_user_name()
+    else:
+        tittle_name = config.get_ollama_name()
 
     widget = QWidget()
     widget.setObjectName("widget")
@@ -50,9 +50,15 @@ def generate_message_widget(user: bool = False) -> tuple[QWidget, QLabel]:
     mainlayout.setSizeConstraint(QLayout.SizeConstraint.SetMaximumSize)
 
     icon = QLabel()
-    if user: chat_icon = QPixmap(config.get_user_icon())
-    else: chat_icon = QPixmap(config.get_bot_icon())
-    chat_icon = chat_icon.scaled(ICON_SIZE, aspectMode=Qt.AspectRatioMode.KeepAspectRatio, mode=Qt.TransformationMode.SmoothTransformation)
+    if user:
+        chat_icon = QPixmap(config.get_user_icon())
+    else: 
+        chat_icon = QPixmap(config.get_bot_icon())
+
+    chat_icon = chat_icon.scaled(
+        ICON_SIZE, aspectMode=Qt.AspectRatioMode.KeepAspectRatio,
+        mode=Qt.TransformationMode.SmoothTransformation
+        )
     icon.setPixmap(chat_icon)
     icon.setFixedSize(ICON_SIZE)
     icon_layout = QHBoxLayout()
@@ -73,8 +79,6 @@ def generate_message_widget(user: bool = False) -> tuple[QWidget, QLabel]:
     tittle_frame.setObjectName("msg_tittle_frame")
     tittle_frame.setLayout(tittle_layout)
 
-
-
     content = QLabel("Generating..")
     content.setWordWrap(True)
     content.setObjectName("msg_content")
@@ -86,11 +90,11 @@ def generate_message_widget(user: bool = False) -> tuple[QWidget, QLabel]:
     content_layout.setSizeConstraint(QLayout.SizeConstraint.SetMinimumSize)
     content_frame = QFrame()
     content_frame.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
-    if user: content_frame.setObjectName("msg_content_frame_user")
-    else: content_frame.setObjectName("msg_content_frame_bot")
+    if user:
+        content_frame.setObjectName("msg_content_frame_user")
+    else:
+        content_frame.setObjectName("msg_content_frame_bot")
     content_frame.setLayout(content_layout)
-
-
 
     if user:
         firstframe.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum)

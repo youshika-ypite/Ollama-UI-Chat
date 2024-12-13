@@ -1,11 +1,8 @@
-import sys
-
 from ollama_term import Ollama
 from config import PageData, Config
 from message import generate_message_widget
 
 from PySide6.QtWidgets import QPushButton, QPlainTextEdit
-from PySide6.QtWidgets import QApplication, QMainWindow
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFrame, QScrollArea
 from PySide6.QtWidgets import QSizePolicy, QGridLayout, QLayout
 
@@ -15,25 +12,16 @@ from PySide6.QtCore import QThread, Signal, Slot
 
 ICON_SIZE = QSize(24, 24)
 
-#Temp
-WINDOW_NAME = "Test chat"
-WINDOW_SIZE = QSize(800, 700)
-WINDOW_FLAG = Qt.FramelessWindowHint
-
-
-
-
 config = Config()
-
-
-
 
 class Backend(QThread):
 
     signal = Signal(str, bool)
     generator = None
 
-    def __init__(self) -> None: super().__init__()
+    def __init__(self, name: str) -> None:
+        super().__init__()
+        self.name = name
 
     def run(self):
         print("||------------------------||")
@@ -41,7 +29,7 @@ class Backend(QThread):
         if self.generator is None:
             print("Please set generator obj")
             return
-        print("||\033[32m QThread is running\033[0m")
+        print("||\033[32m QThread is running\033[0m | ", self.name)
         try:
             for dict_obj in self.generator:
                 
@@ -77,12 +65,12 @@ class Backend(QThread):
         self.generator = generator
 
 
-class ChatWindow(QMainWindow):
+class ChatWindow:
 
-    def __init__(self):
-        QMainWindow.__init__(self)
+    def __init__(self, name: str = "StdPageName"):
+        #QMainWindow.__init__(self)
 
-        self.chat = PageData()
+        self.chat = PageData(name)
         result = config.search(self.chat.name)
         if result is None:
             config.update_chat(self.chat.get_data())
@@ -93,13 +81,12 @@ class ChatWindow(QMainWindow):
 
         self.ollama_chat = Ollama()
         self.ollama_chat.set_chat_history(_chat_history)
-        self.generator_backend = Backend()
+        self.generator_backend = Backend(self.chat.name)
         self.generator_backend.signal.connect(self.draw_generated)
         
         self.widget = QWidget()
         self.widget.setContentsMargins(0, 0, 0, 0)
         self.widget.setObjectName("main_widget")
-        self._update_css()
         # First-half for messages
         self.grid_widget = QWidget()
         self.grid_layout = QGridLayout(self.grid_widget)
@@ -126,27 +113,17 @@ class ChatWindow(QMainWindow):
         self.send_message_button.setShortcut(Qt.Key.Key_Enter)
         self.send_message_button.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred)
 
-        self.change_theme_button = QPushButton("~Theme")
-        self.change_theme_button.setObjectName("change_btn")
-        self.change_theme_button.clicked.connect(self.change_theme)
-        self.change_theme_button.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred)
-
         self.send_frame_layout = QHBoxLayout()
         self.send_frame = QFrame()
         self.send_frame.setLayout(self.send_frame_layout)
         self.send_frame_layout.setContentsMargins(0, 0, 0, 0)
         self.send_frame_layout.addWidget(self.text_input_widget)
         self.send_frame_layout.addWidget(self.send_message_button)
-        self.send_frame_layout.addWidget(self.change_theme_button)
         # Layout sets
         self.mainlayout = QVBoxLayout(self.widget)
         self.mainlayout.setObjectName("mainlayout")
         self.mainlayout.addWidget(self.scroll_area)
         self.mainlayout.addWidget(self.send_frame)
-        # Other
-        self.resize(WINDOW_SIZE)
-        self.setWindowTitle(WINDOW_NAME)
-        self.setCentralWidget(self.widget)
 
         self.messages = []
         self.last_response = ""
@@ -154,17 +131,6 @@ class ChatWindow(QMainWindow):
         # Load and draw message from memory
         self.load_messages(_chat_history)
         self.draw_messages()
-
-    def _update_css(self):
-        self.css = open(config.get_theme(), "r").read()
-        self.setStyleSheet(self.css)
-
-    def change_theme(self):
-        if config.get_theme_index() == 0:
-            config.change_theme(1)
-        else:
-            config.change_theme(0)
-        self._update_css()
 
     def load_messages(self, _chat_history: list[dict[str, any]]):
         for item in _chat_history:
@@ -181,9 +147,6 @@ class ChatWindow(QMainWindow):
 
     def draw_last_message(self, last_message_widget: QWidget):
         self.grid_layout.addWidget(last_message_widget)
-
-        #self.scroll_area.verticalScrollBar().setSliderPosition(self.scroll_area.verticalScrollBar().maximum()+1)
-        #self.scroll_area.set
 
     def append_message_widget(self, user=False):
         widget_and_label = generate_message_widget(user)
@@ -227,20 +190,11 @@ class ChatWindow(QMainWindow):
     def scroll_bottom(self, minimum, maximum):
         self.vscroll_bar.setValue(maximum)
 
-    def closeEvent(self, event):
+    def close_event(self) -> PageData:
         chat_history = self.ollama_chat.get_chat_history()
         self.chat.set_chat_history(chat_history)
 
-        data = self.chat.get_data()
-        config.update_chat(data)
-        config.save()
-        
-        #event.accept()
+        return self.chat
 
-
-
-app = QApplication(sys.argv)
-window = ChatWindow()
-window.show()
-
-app.exec()
+    def return_widget(self):
+        return self.widget
