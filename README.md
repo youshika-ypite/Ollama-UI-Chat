@@ -23,7 +23,7 @@ pip install Ollama, PySide6
 ## Запуск
 ```bash
 venv\Scripts\activate
-chat.py
+window.py
 ```
 
 ## Модель

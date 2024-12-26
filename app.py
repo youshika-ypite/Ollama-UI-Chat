@@ -1,19 +1,20 @@
-import sys
-
 from PySide6.QtCore import Qt, QSize
 
 from PySide6.QtWidgets import QStatusBar
 
-from PySide6.QtWidgets import QPushButton
 from PySide6.QtWidgets import QWidget, QFrame
+from PySide6.QtWidgets import QPushButton, QLabel
 
-from PySide6.QtWidgets import QApplication, QMainWindow, QSizePolicy
+from PySide6.QtWidgets import QMainWindow, QSizePolicy
 
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QStackedLayout
 
 from config import Config
 from chat import ChatWindow
 from dialogs import Creator
+
+from toggle_anim import AnimatedToggle
+from widget_anim import WidgetCloseAnimation
 
 WINDOW_NAME = "Test chat"
 WINDOW_SIZE = QSize(800, 700)
@@ -56,10 +57,12 @@ def generate_button(
 
     return widget
 
-class MainWindow(QMainWindow):
+class ChatsManager(QMainWindow):
 
     def __init__(self) -> None:
         QMainWindow.__init__(self)
+
+        self.create_active = False
 
         self._update_css()
         self._load_policy()
@@ -75,7 +78,6 @@ class MainWindow(QMainWindow):
         self.pageLayout = QVBoxLayout()
         self.pageLayout.addLayout(self.stackLayout)
 
-
         self.LeftMenuFrame = QFrame()
         self.LeftMenuLayout = QVBoxLayout()
         self.LeftMenuFrame.setLayout(self.LeftMenuLayout)
@@ -86,20 +88,25 @@ class MainWindow(QMainWindow):
         self.RightMenuFrame.setLayout(self.pageLayout)
         self.RightMenuLayout.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
 
+        self.anim = WidgetCloseAnimation(self.LeftMenuFrame, self.RightMenuFrame)
 
         self.mainlayout.addWidget(self.LeftMenuFrame)
         self.mainlayout.addWidget(self.RightMenuFrame)
 
+        self.theme_label = QLabel("Light theme: ")
+        self.theme_toggle = AnimatedToggle()
+        self.theme_toggle.setFixedSize(self.theme_toggle.sizeHint())
+        self.theme_toggle.stateChanged.connect(self.change_theme)
 
-        self.theme_btn = QPushButton("Change theme")
-        self.theme_btn.pressed.connect(self.change_theme)
         self.new_chat_btn = QPushButton("Create new chat")
         self.new_chat_btn.pressed.connect(self.creator.show)
 
         self.status_bar = QStatusBar()
         self.status_bar.setObjectName("status_bar")
-        self.status_bar.addPermanentWidget(self.theme_btn)
+        self.status_bar.addPermanentWidget(self.theme_label)
+        self.status_bar.addPermanentWidget(self.theme_toggle)
         self.status_bar.addWidget(self.new_chat_btn)
+        self.status_bar.addWidget(self.anim.get_button())
 
         self.pages = []
         self.buttons = []
@@ -123,6 +130,7 @@ class MainWindow(QMainWindow):
                 print(exc)
         
         config.save()
+        event.accept()
 
     def set_all_null_ContentsMargins(self):
         self.mainlayout.setContentsMargins(0, 0, 0, 0)
@@ -167,17 +175,21 @@ class MainWindow(QMainWindow):
         names = [item.chat.name for item in self.page_classes()]
         for item in chats:
             if item not in names:
-                self.append_page(ChatWindow(item))
+                chat = ChatWindow(item)
+                self.append_page(chat)
 
     def create_chat(self, name: str):
         if name not in [item.chat.name for item in self.page_classes()]:
             chat = ChatWindow(name)
             self.append_page(chat)
 
+        if self.create_active:
+            self.show()
+            self.create_active = False
 
-application = QApplication(sys.argv)
+        index = self.pages.index(chat)
+        self.stackLayout.setCurrentIndex(index)
 
-main_window = MainWindow()
-main_window.show()
-
-application.exec()
+    def show_chat_creator(self):
+        self.creator.show()
+        self.create_active = True
