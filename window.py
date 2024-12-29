@@ -9,7 +9,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QSizePolicy
 
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QMessageBox, QSpacerItem
 
-from app import ChatsManager
+from body import MainBody
 
 QSZ_POLICY = QSizePolicy.Policy
 
@@ -43,7 +43,7 @@ class MainWindow(QMainWindow):
             event.ignore()
 
     def __init_chats_window(self):
-        self.chats = ChatsManager()
+        self.chats = MainBody()
         # Настроить передачу настроек из конфигурационного файла аля для статикмтд
 
     def _create_new_chat(self):
