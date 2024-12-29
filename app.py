@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QPushButton, QLabel
 
 from PySide6.QtWidgets import QMainWindow, QSizePolicy
 
-from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QStackedLayout
+from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QStackedLayout,  QMessageBox, QLayoutItem
 
 from config import Config
 from chat import ChatWindow
@@ -24,6 +24,8 @@ config = Config()
 
 def generate_button(
         stacked_layout: QStackedLayout,
+        stacked_layout_widget: QWidget,
+        page_delete_function: object,
         index: int,
         page_name: str,
         delete: bool = False
@@ -34,9 +36,10 @@ def generate_button(
 
     def deleted(widget: QWidget, layout: QHBoxLayout):
         config.delete_chat(page_name)
-        stacked_layout.removeWidget(stacked_layout.widget(index))
+        stacked_layout.removeWidget(stacked_layout_widget)
         layout.removeWidget(widget)
         widget.deleteLater()
+        page_delete_function(page_name)
 
     widget = QWidget()
     mainlayout = QHBoxLayout(widget)
@@ -56,6 +59,24 @@ def generate_button(
         mainlayout.addWidget(delete_btn)
 
     return widget
+
+class SideMenu:
+
+    def __init__(self) -> None:
+
+        self.main_layout = QVBoxLayout()
+        self.main_layout.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.main_frame = QFrame()
+        self.main_frame.setObjectName("side_menu")
+        self.main_frame.setLayout(self.main_layout)
+
+    def append_widget(self, widget: QWidget): self.main_layout.addWidget(widget)
+    def append_item(self, item: QLayoutItem): self.main_layout.addItem(item)
+
+    def get_side_qframe(self) -> QFrame: return self.main_frame
+    def get_layout(self) -> QVBoxLayout: return self.main_layout
 
 class ChatsManager(QMainWindow):
 
@@ -78,19 +99,23 @@ class ChatsManager(QMainWindow):
         self.pageLayout = QVBoxLayout()
         self.pageLayout.addLayout(self.stackLayout)
 
-        self.LeftMenuFrame = QFrame()
-        self.LeftMenuLayout = QVBoxLayout()
-        self.LeftMenuFrame.setLayout(self.LeftMenuLayout)
-        self.LeftMenuLayout.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        self.side_menu = SideMenu()
+
+        #self.LeftMenuFrame = QFrame()
+        #self.LeftMenuFrame.setObjectName("left_menu_frame")
+        #self.LeftMenuLayout = QVBoxLayout()
+        #self.LeftMenuFrame.setLayout(self.LeftMenuLayout)
+        #self.LeftMenuLayout.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
 
         self.RightMenuFrame = QFrame()
+        self.RightMenuFrame.setObjectName("right_menu_frame")
         self.RightMenuLayout = QVBoxLayout()
         self.RightMenuFrame.setLayout(self.pageLayout)
         self.RightMenuLayout.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
 
-        self.anim = WidgetCloseAnimation(self.LeftMenuFrame, self.RightMenuFrame)
+        self.anim = WidgetCloseAnimation(self.side_menu.get_side_qframe(), self.RightMenuFrame)
 
-        self.mainlayout.addWidget(self.LeftMenuFrame)
+        self.mainlayout.addWidget(self.side_menu.get_side_qframe())
         self.mainlayout.addWidget(self.RightMenuFrame)
 
         self.theme_label = QLabel("Light theme: ")
@@ -134,7 +159,7 @@ class ChatsManager(QMainWindow):
 
     def set_all_null_ContentsMargins(self):
         self.mainlayout.setContentsMargins(0, 0, 0, 0)
-        self.LeftMenuLayout.setContentsMargins(0, 0, 0, 0)
+        #self.LeftMenuLayout.setContentsMargins(0, 0, 0, 0)
         self.RightMenuLayout.setContentsMargins(0, 0, 0, 0)
 
     def _update_css(self):
@@ -156,15 +181,17 @@ class ChatsManager(QMainWindow):
         self.pages.append(page)
 
         new_btn = generate_button(
-            self.stackLayout,
-            self.pages.index(page),
-            page.chat.name,
+            stacked_layout=self.stackLayout,
+            stacked_layout_widget=self.page_classes()[-1].return_widget(),
+            page_delete_function=self.delete_chat,
+            index=self.pages.index(page),
+            page_name=page.chat.name,
             delete=True
             )
         
         self.buttons.append(new_btn)
-        self.LeftMenuLayout.addWidget(self.buttons[-1])
-
+        self.side_menu.append_widget(self.buttons[-1])
+        #self.LeftMenuLayout.addWidget(self.buttons[-1])
 
         self.stackLayout.addWidget(
             self.page_classes()[-1].return_widget()
@@ -182,6 +209,13 @@ class ChatsManager(QMainWindow):
         if name not in [item.chat.name for item in self.page_classes()]:
             chat = ChatWindow(name)
             self.append_page(chat)
+        else:
+            message = QMessageBox.question(
+                self,
+                "Ошибка", "Чат с таким именем уже существует",
+                QMessageBox.Ok
+            )
+            return
 
         if self.create_active:
             self.show()
@@ -189,6 +223,15 @@ class ChatsManager(QMainWindow):
 
         index = self.pages.index(chat)
         self.stackLayout.setCurrentIndex(index)
+
+    def delete_chat(self, page_name: str):
+        try:
+            for item in self.page_classes():
+                if item.chat.name == page_name:
+                    self.pages.remove(item)
+                    break
+        except:
+            print("Not found chat to remove")
 
     def show_chat_creator(self):
         self.creator.show()

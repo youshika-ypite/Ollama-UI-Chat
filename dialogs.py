@@ -32,5 +32,6 @@ class Creator(QDialog):
     def accepted(self, get_func):
         name = self.textEdit.toPlainText()
         get_func(name)
+        self.textEdit.setPlainText("")
 
         self.close()
